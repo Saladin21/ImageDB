@@ -32,17 +32,14 @@ class MetaTable():
     #         "name" : self.name,
     #         'feature' : self.FE_id
     #     }
-    def search(self, selecStatement: SelectStatement, count):
+    def search(self, selecStatement: SelectStatement):
         if (selecStatement.meta_label == 'height' or selecStatement.meta_label=='width'):
             var = int(selecStatement.variable)
         else:
             var = selecStatement.variable
         found = self.ops[selecStatement.predicate](selecStatement.meta_label, var)
-        found = list(found.index)
-        not_found = list(set(self.metadata.index) - set(found))
-        ids = np.array([found + not_found])
-        sim = np.array([[1 for i in range(len(found))] + [0 for i in range(len(not_found))]])
-        return(sim[:count], ids[:count])
+        found = set(found.index)
+        return found
     
     def insert(self, FEFactory, img_path):
         cache_path = os.path.join(self.data_path, 'metadata.csv')

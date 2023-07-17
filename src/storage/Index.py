@@ -22,8 +22,12 @@ class faissIndex(Index):
     def add(self, new_features, all_features=None):
         self.faiss.add(new_features)
 
-    def search(self, query, count):
-        return self.faiss.search(query, count)
+    def search(self, query, count, filter):
+        if filter is not None:
+            sel = faiss.IDSelectorArray(filter)
+            return self.faiss.search(query, count, params=faiss.SearchParameters(sel=sel))
+        else:
+            return self.faiss.search(query, count)
     
     def save(self, path):
         faiss.write_index(self.faiss, path)
@@ -42,9 +46,10 @@ class FlatCosineIndex(faissIndex):
         norm_feature = np.copy(new_features)
         faiss.normalize_L2(norm_feature)
         self.faiss.add(norm_feature)
-    def search(self, query, count):
-        faiss.normalize_L2(query)
-        return super().search(query, count)
+    def search(self, query, count, filter):
+        norm_q = np.copy(query)
+        faiss.normalize_L2(norm_q)
+        return super().search(norm_q, count, filter)
 
 class FlatL2Index(faissIndex):
     def __init__(self, features = None, path = None) -> None:
@@ -64,6 +69,7 @@ class PQCosineIndex(faissIndex):
         faiss.normalize_L2(norm)
         self.faiss.train(norm)
         self.faiss.add(norm)
-    def search(self, query, count):
-        faiss.normalize_L2(query)
-        return super().search(query, count)
+    def search(self, query, count, filter):
+        norm_q = np.copy(query)
+        faiss.normalize_L2(norm_q)
+        return super().search(norm_q, count, filter)

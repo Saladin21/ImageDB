@@ -172,7 +172,6 @@ class Select(object):
         self.tables = {}
         for t in temp_tables:
             self.tables[t[0]] = t[1]
-        print(tokens)
         if tokens[-4] == 'AND':
             self.expr = tokens[-3]
             self.expr_meta = tokens[-5]

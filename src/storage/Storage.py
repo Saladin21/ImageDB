@@ -112,17 +112,31 @@ class Storage():
 
     def search(self, q:SelectQuery):
         if (self.current_db is not None):
-            t0 = time.time()
-            if (q.type[0] == 'knn'):
-                statement_result = []
-                for s in q.statements:
-                    res = self.db[self.current_db].search(s, self.fe, self.db[self.current_db].getImageCount())
-                    if s.not_flag:
-                        tmp_res_0 = np.flip(res[0])
-                        tmp_res_1 = np.flip(res[1])
-                        res = (tmp_res_0, tmp_res_1)
-                    statement_result.append({'sim':res[0], 'id':res[1]})
-                return statement_result
+            
+            #metadata filter
+            if q.statements_meta is not None:
+                meta_ids = []
+                for meta in q.statements_meta:
+                    meta_ids.append(self.getCurrentDB().searchMeta(meta))
+                filter = q.plan_meta.computeMeta(meta_ids, self.getCurrentDB().getImageCount())
+                filter = list(filter)
+            else:
+                filter = None
+
+            #similarity search
+            if (filter is None or len(filter) > 0):
+                if (q.type[0] == 'knn'):
+                    statement_result = []
+                    for s in q.statements:
+                        res = self.db[self.current_db].search(s, self.fe, self.db[self.current_db].getImageCount(), filter)
+                        if s.not_flag:
+                            tmp_res_0 = np.flip(res[0])
+                            tmp_res_1 = np.flip(res[1])
+                            res = (tmp_res_0, tmp_res_1)
+                        statement_result.append({'sim':res[0], 'id':res[1]})
+                    return statement_result
+            else:
+                return None
         else:
             raise AssertionError('No database is chosen')
 

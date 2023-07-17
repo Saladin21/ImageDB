@@ -30,10 +30,13 @@ class QueryEvaluator():
     
     def select(self, query):
         statement_result = self.storage.search(query)
-        result = self.topKFagin(statement_result, query)
+        if statement_result is not None:
+            result = self.topKFagin(statement_result, query)
 
-        for r in result:
-            r['path'] = self.storage.getCurrentDB().getImagebyId(r['id'])
+            for r in result:
+                r['path'] = self.storage.getCurrentDB().getImagebyId(r['id'])
+        else:
+            result = []
         return result
 
     def topKFagin(self, statement_result, q:SelectQuery):
@@ -41,7 +44,8 @@ class QueryEvaluator():
         m = {}
         c = []
         i = 0
-        while len(c) < q.type[1]:
+        max = len(statement_result[0])
+        while len(c) < q.type[1] and len(c) < max :
             for j in range(len(statement_result)):
                 id = statement_result[j]['id'][0][i]
                 sim = statement_result[j]['sim'][0][i]

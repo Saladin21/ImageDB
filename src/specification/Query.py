@@ -39,6 +39,30 @@ class SelectPlanNode():
                     # return 1 - ((1 - self.left.compute(sim, semantic)+ 1 -  self.right.compute(sim, semantic))/2)
                else:
                     return 1-(self.child[0].compute(sim, semantic))
+     def computeMeta(self, ids, imCount):
+          if isinstance(self.value, int):
+               return ids[self.value]
+          else:
+               if self.value == 'and':
+                    temp = None
+                    for c in self.child:
+                         if temp == None:
+                              temp = c.computeMeta(ids, imCount)
+                         else:
+                              temp = temp.intersection(c.computeMeta(ids, imCount))
+                    return temp
+               if self.value == 'or':
+                    temp = None
+                    for c in self.child:
+                         if temp == None:
+                              temp = c.computeMeta(ids, imCount)
+                         else:
+                              temp = temp.union(c.computeMeta(ids, imCount))
+                    return temp
+               else:
+                    temp = set(range(imCount))
+                    return temp - self.child[0].computeMeta(ids, imCount)
+
      def updateValue(self, value):
           if isinstance(self.value, int):
                self.value += value

@@ -52,11 +52,10 @@ class Database():
         return res
     def listIndex(self, tableName):
         return self.getTable(tableName).getIndexes()
-    def search(self, selectStatement: SelectStatement, FEFactory, count):
-        if selectStatement.table == 'META':
-            return self.meta_table.search(selectStatement, count)
-        else:
-            return self.getTable(selectStatement.table).search(selectStatement, FEFactory, count)
+    def searchMeta(self, selectStatement):
+        return self.meta_table.search(selectStatement)
+    def search(self, selectStatement: SelectStatement, FEFactory, count, filter=None):
+        return self.getTable(selectStatement.table).search(selectStatement, FEFactory, count, filter)
     def insertImages(self, FEFactory, img_path):
         new_path = self.copyImages(img_path)
         self.imagesPath += new_path

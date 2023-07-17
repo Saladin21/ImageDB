@@ -41,10 +41,10 @@ class Table():
         }
     def getIndexes(self):
         return list(self.index.keys())
-    def search(self, selecStatement: SelectStatement, FEFactory, count):
+    def search(self, selecStatement: SelectStatement, FEFactory, count, filter=None):
         fe = FEFactory.getFE(self.FE_id)
         q_vec = np.array([fe(selecStatement.variable, pred=selecStatement.predicate)])
-        return self.index[selecStatement.index].search(q_vec, count)
+        return self.index[selecStatement.index].search(q_vec, count, filter)
     def insert(self, FEFactory, img_path):
         if len(self.index) > 0:
             cache_path = os.path.join(self.data_path, 'features.npy')
