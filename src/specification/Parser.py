@@ -46,38 +46,57 @@ class Parser():
         )
 
         expr = pp.Forward()
+        expr_meta = pp.Forward()
 
         condition = pp.Group(pp.Optional(not_) + meta_ + dot + identifier + (operator + (string | number))
         ).setParseAction(Condition)
 
+        condition = condition | (lparen + expr_meta + rparen)
+
         condition_sim = pp.Group(pp.Optional(not_) +  (identifier + (dot + operator_sim))).setParseAction(ConditionSim)
+        condition_sim = condition_sim | (lparen + expr + rparen)
 
-        condition = condition | condition_sim | (lparen + expr + rparen)
-
-        and_condition = (condition + pp.ZeroOrMore(and_ + condition)).setParseAction(
+        and_condition = (condition_sim + pp.ZeroOrMore(and_ + condition_sim)).setParseAction(
         AndCondition
         )
 
+        and_condition_meta = (condition + pp.ZeroOrMore(and_ + condition)).setParseAction(
+        AndCondition
+        )
+
+        expr_meta << (and_condition_meta+ pp.ZeroOrMore(or_ + and_condition_meta))
         expr << (and_condition + pp.ZeroOrMore(or_ + and_condition))
         expr = expr.setParseAction(Expression)
+        expr_meta = expr_meta.setParseAction(Expression)
 
-        select = (select_ + image_ + from_ + identifier + pp.Optional(use_ + index_ + identifier) + pp.ZeroOrMore(comma + identifier + pp.Optional(use_ + index_ + identifier)) + where_ + expr + limit_ + number).setParseAction(Select)
+        select = (select_ + image_ + from_ + identifier + pp.Optional(use_ + index_ + identifier) + pp.ZeroOrMore(comma + identifier + pp.Optional(use_ + index_ + identifier)) + where_ + ((expr_meta + and_ + expr) | expr_meta | expr) + limit_ + number).setParseAction(Select)
 
         try:
             parsed = select.parse_string(input)[0]
         except Exception as e:
             raise e
         # print(parsed.tables)
-        statements, plan = parsed.expr.makeNode()
-
-        for s in statements:
-            index = parsed.tables.get(s.table)
-            if index is not None:
-                s.index = index
+        if parsed.expr_meta is not None:
+            statements, plan = parsed.expr.makeNode()
+            statements_meta, plan_meta = parsed.expr_meta.makeNode()
+        else:
+            st, p = parsed.expr.makeNode()
+            if st[0].table == "META":
+                statements_meta, plan_meta = st, p
+                statements, plan = None, None
             else:
-                s.index = "FlatCosine"
+                statements, plan = st, p
+                statements_meta, plan_meta = None, None
 
-        return SelectQuery(statements=statements, plan=plan, semantic='average', type=('knn', int(parsed.n)))
+        if statements is not None:
+            for s in statements:
+                index = parsed.tables.get(s.table)
+                if index is not None:
+                    s.index = index
+                else:
+                    s.index = "FlatCosine"
+
+        return SelectQuery(statements=statements, plan=plan, statements_meta=statements_meta, plan_meta=plan_meta, semantic='average', type=('knn', int(parsed.n)))
     
     def parseCreateDB(self, input) -> CreateDBQuery:
         parse = create_ + database_ + alphaword

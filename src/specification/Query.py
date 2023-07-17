@@ -53,12 +53,14 @@ class SelectPlanNode():
           return printed
 
 class SelectQuery(Query):
-    def __init__(self, statements, plan : SelectPlanNode, semantic, type) -> None:
+    def __init__(self, statements, plan : SelectPlanNode, statements_meta, plan_meta, semantic, type) -> None:
         super().__init__(queryType = 'SELECT')
         self.plan = plan #binary tree
         self.semantic = semantic #fuzzy logic semantic
         self.type = type #('knn', k) atau ('thr', thr)
         self.statements = statements # list of SelectStatement
+        self.statements_meta = statements_meta
+        self.plan_meta = plan_meta
 
 class CreateTableQuery(Query):
     def __init__(self, tableName, FEId) -> None:

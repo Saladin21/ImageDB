@@ -172,7 +172,13 @@ class Select(object):
         self.tables = {}
         for t in temp_tables:
             self.tables[t[0]] = t[1]
-        self.expr = tokens[-3]
+        print(tokens)
+        if tokens[-4] == 'AND':
+            self.expr = tokens[-3]
+            self.expr_meta = tokens[-5]
+        else:
+            self.expr_meta = None
+            self.expr = tokens[-3]
         self.n = tokens[-1].value
 
 lparen = pp.Suppress("(")
