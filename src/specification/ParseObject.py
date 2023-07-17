@@ -18,20 +18,21 @@ class Expression(object):
         statements = []
         if len(self.and_conditions) > 1:
             root = SelectPlanNode(value='or')
-            cNode = root
+            # cNode = root
             length = len(self.and_conditions)
             for i in range(0, length):
                 s, n = self.and_conditions[i].makeNode()
                 n.updateValue(len(statements))
                 statements += s
-                if i == 0:
-                    cNode.left = n
-                elif i < length -1:
-                    cNode.right = SelectPlanNode(value='or')
-                    cNode = cNode.right
-                    cNode.left = n
-                else:
-                    cNode.right = n
+                root.child.append(n)
+                # if i == 0:
+                #     cNode.left = n
+                # elif i < length -1:
+                #     cNode.right = SelectPlanNode(value='or')
+                #     cNode = cNode.right
+                #     cNode.left = n
+                # else:
+                #     cNode.right = n
             plan = root
         else:
             c = self.and_conditions[0].makeNode()
@@ -53,20 +54,21 @@ class AndCondition(object):
         statements = []
         if len(self.conditions) > 1:
             root = SelectPlanNode(value='and')
-            cNode = root
+            # cNode = root
             length = len(self.conditions)
             for i in range(0, length):
                 s, n = self.conditions[i].makeNode()
                 n.updateValue(len(statements))
                 statements.append(s)
-                if i == 0:
-                    cNode.left = n
-                elif i < length -1:
-                    cNode.right = SelectPlanNode(value='and')
-                    cNode = cNode.right
-                    cNode.left = n
-                else:
-                    cNode.right = n
+                root.child.append(n)
+                # if i == 0:
+                #     cNode.left = n
+                # elif i < length -1:
+                #     cNode.right = SelectPlanNode(value='and')
+                #     cNode = cNode.right
+                #     cNode.left = n
+                # else:
+                #     cNode.right = n
             plan = root
         else:
             c = self.conditions[0].makeNode()
@@ -96,7 +98,7 @@ class Condition(object):
         if self.not_flag:
             left = plan
             plan = SelectPlanNode(value = 'not')
-            plan.left = left
+            plan.child.append(left)
         return (statement, plan)
 
 class String(object):
@@ -151,7 +153,7 @@ class ConditionSim(object):
         if self.not_flag:
             left = plan
             plan = SelectPlanNode(value = 'not')
-            plan.left = left
+            plan.child.append(left)
         return (statement, plan)
         
     

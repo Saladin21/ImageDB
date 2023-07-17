@@ -46,20 +46,21 @@ class Table():
         q_vec = np.array([fe(selecStatement.variable, pred=selecStatement.predicate)])
         return self.index[selecStatement.index].search(q_vec, count)
     def insert(self, FEFactory, img_path):
-        cache_path = os.path.join(self.data_path, 'features.npy')
-        fe = FEFactory.getFE(self.FE_id)
-        features = np.array([fe.extractImage(i) for i in img_path])
+        if len(self.index) > 0:
+            cache_path = os.path.join(self.data_path, 'features.npy')
+            fe = FEFactory.getFE(self.FE_id)
+            features = np.array([fe.extractImage(i) for i in img_path])
 
-        if os.path.exists(cache_path):
-                temp = np.load(cache_path)
-                all_features = np.concatenate((temp, features))
-                np.save(cache_path, all_features)
-        else:
-            all_features = features
-        for k, v in self.Index.items():
-            index_path = os.path.join(self.data_path, f"{k}.bin")
-            v.add(new_features = features, all_features=all_features)
-            v.save(index_path)
+            if os.path.exists(cache_path):
+                    temp = np.load(cache_path)
+                    all_features = np.concatenate((temp, features))
+                    np.save(cache_path, all_features)
+            else:
+                all_features = features
+            for k, v in self.index.items():
+                index_path = os.path.join(self.data_path, f"{k}.bin")
+                v.add(new_features = features, all_features=all_features)
+                v.save(index_path)
     def delete(self, ids):
         cache_path = os.path.join(self.data_path, 'features.npy')
         if os.path.exists(cache_path):

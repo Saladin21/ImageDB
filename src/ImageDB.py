@@ -9,11 +9,12 @@ class ImageDB():
         self.storage = Storage(data_path=data_path)
         self.evaluator = QueryEvaluator(storage=self.storage)
     def query(self, input):
+        res = {}
         try:
             q = self.parser.parse(input)
         except Exception as e:
             res['error'] =  e
-        
+            return res
         t0 = time.time()
         try:
             res = self.evaluator.execute(q)
