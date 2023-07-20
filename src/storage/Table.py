@@ -11,7 +11,9 @@ class Table():
         self.FE_id = FE_id
         self.index = {}
         self.data_path = os.path.join(data_path, self.name)
-    def create_index(self,index_type, index_class, FEFactory, img_path):
+    def create_index(self,index_type, FEFactory, img_path):
+        fe = FEFactory.getFE(self.FE_id)
+        index_class = fe.supported_index[index_type]
         index_path = os.path.join(self.data_path, f"{index_type}.bin")
         if os.path.exists(index_path):
             self.index[index_type] = index_class(path = index_path)
@@ -20,7 +22,6 @@ class Table():
             if os.path.exists(cache_path):
                 features = np.load(cache_path)
             else:
-                fe = FEFactory.getFE(self.FE_id)
                 features = np.array([fe.extractImage(i) for i in img_path])
                 np.save(cache_path, features)
             self.index[index_type] = index_class(features)
@@ -44,7 +45,15 @@ class Table():
     def search(self, selecStatement: SelectStatement, FEFactory, count, filter=None):
         fe = FEFactory.getFE(self.FE_id)
         q_vec = np.array([fe(selecStatement.variable, pred=selecStatement.predicate)])
-        return self.index[selecStatement.index].search(q_vec, count, filter)
+        if selecStatement.index is None:
+            if "PQ" in self.index.keys():
+                index = "PQ"
+                # print("use pq")
+            else:
+                index = "FLAT"
+        else:
+            index = selecStatement.index.upper()
+        return self.index[index].search(q_vec, count, filter)
     def insert(self, FEFactory, img_path):
         if len(self.index) > 0:
             cache_path = os.path.join(self.data_path, 'features.npy')

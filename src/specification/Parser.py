@@ -94,7 +94,7 @@ class Parser():
                 if index is not None:
                     s.index = index
                 else:
-                    s.index = "FlatCosine"
+                    s.index = None
 
         return SelectQuery(statements=statements, plan=plan, statements_meta=statements_meta, plan_meta=plan_meta, semantic='average', type=('knn', int(parsed.n)))
     

@@ -54,3 +54,6 @@ class MetaTable():
         self.metadata.drop(ids)
         self.metadata.reset_index(drop=True)
         self.metadata.to_csv(cache_path, index=False)
+    
+    def getMetadata(self, id):
+        return self.metadata.filter(items=id, axis=0).to_dict()

@@ -8,6 +8,7 @@ import os
 from ultralytics import YOLO
 from transformers import AutoTokenizer, CLIPModel, AutoProcessor
 from PIL import Image
+from storage.Index import FlatIPIndex, FlatCosineIndex, PQIPIndex, PQCosineIndex
 
 class FeatureExtractor():
     def __init__(self, id, name, supported_pred, feature_dim):
@@ -15,6 +16,10 @@ class FeatureExtractor():
         self.name = name
         self.supported_pred = supported_pred
         self.feature_dim = feature_dim
+        self.supported_index = {
+            "FLAT" : FlatCosineIndex,
+            "PQ" : PQCosineIndex
+        }
     # abstract method
     def extract(self, input, pred):
         #input: visually_similar : path, semantically_similar: text, contains : text 
@@ -146,11 +151,16 @@ class YOLOv8FeatureExtractor(FeatureExtractor):
     def __init__(self):
         super().__init__(4, name='YOLOV8', supported_pred=['CONTAINS'], feature_dim=80)
         self.model = YOLO('yolov8n.pt')
+        self.supported_index = {
+            "FLAT" : FlatIPIndex,
+            "PQ" : PQIPIndex
+        }
     def extractImage(self, input):
         res = self.model(input, verbose=False)
         vec = np.zeros(len(self.model.names),dtype="float32")
-        for i in res[0].boxes.cls:
-            vec[int(i)] = 1
+        for i, c in enumerate(res[0].boxes.cls):
+            if vec[int(c)] < res[0].boxes.conf[i]: 
+                vec[int(c)] = res[0].boxes.conf[i]
         return vec
     def extract(self, input, pred):
         if pred == 'CONTAINS':
@@ -165,16 +175,19 @@ class YOLOv8LeftFeatureExtractor(FeatureExtractor):
     def __init__(self):
         super().__init__(6, name='YOLOV8LEFT', supported_pred=['LEFT'], feature_dim=6400)
         self.model = YOLO('yolov8n.pt')
+        self.supported_index = {
+            "FLAT" : FlatIPIndex,
+            "PQ" : PQIPIndex
+        }
     def extractImage(self, input):
         res = self.model(input, verbose=False)
         cls = [int(o.item()) for o in res[0].boxes.cls]
         vec = np.array([[0 for i in range(len(res[0].names))] for i in range(len(res[0].names))], dtype="float32")
         for i in range (len(cls)):
             for j in range(i+1, len(cls)):
-
-                if res[0].boxes.xyxy[i][2] < res[0].boxes.xyxy[j][0]:
+                if res[0].boxes.xywh[i][0] < res[0].boxes.xywh[j][0]:
                     vec[cls[i]][cls[j]] = 1
-                elif res[0].boxes.xyxy[j][2] < res[0].boxes.xyxy[i][0]:
+                elif res[0].boxes.xywh[i][0] > res[0].boxes.xywh[j][0]:
                     vec[cls[j]][cls[i]] = 1
         return vec.flatten()
     def extract(self, input, pred):
@@ -192,16 +205,19 @@ class YOLOv8AboveFeatureExtractor(FeatureExtractor):
     def __init__(self):
         super().__init__(7, name='YOLOV8ABOVE', supported_pred=['ABOVE'], feature_dim=6400)
         self.model = YOLO('yolov8n.pt')
+        self.supported_index = {
+            "FLAT" : FlatIPIndex,
+            "PQ" : PQIPIndex
+        }
     def extractImage(self, input):
         res = self.model(input, verbose=False)
         cls = [int(o.item()) for o in res[0].boxes.cls]
         vec = np.array([[0 for i in range(len(res[0].names))] for i in range(len(res[0].names))], dtype="float32")
         for i in range (len(cls)):
             for j in range(i+1, len(cls)):
-
-                if res[0].boxes.xyxy[i][3] > res[0].boxes.xyxy[j][1]:
+                if res[0].boxes.xywh[i][1] > res[0].boxes.xywh[j][1]:
                     vec[cls[i]][cls[j]] = 1
-                elif res[0].boxes.xyxy[j][3] > res[0].boxes.xyxy[i][1]:
+                elif res[0].boxes.xywh[i][1] < res[0].boxes.xywh[j][1]:
                     vec[cls[j]][cls[i]] = 1
         return vec.flatten()
     def extract(self, input, pred):

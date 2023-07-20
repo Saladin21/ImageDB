@@ -12,12 +12,16 @@ class SelectStatement():
           self.not_flag = not_flag
           self.meta_label = meta_label
      def __str__(self) -> str:
-          return f"{self.predicate}({self.table},{self.meta_label}, {self.variable}, {self.index}, {self.not_flag})"
+          if self.not_flag:
+               _not = "Not "
+          else:
+               _not = ''
+          return f"{_not}{self.predicate}({self.table}, {self.variable[0]})"
 
 class SelectPlanNode():
      def __init__(self, value=None) -> None:
-          self.left : SelectPlanNode = None
-          self.right : SelectPlanNode = None
+          # self.left : SelectPlanNode = None
+          # self.right : SelectPlanNode = None
           self.child = []
           self.value = value # and, or, not, id of selectstatement
      def compute(self, sim:list, semantic):

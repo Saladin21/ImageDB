@@ -17,7 +17,7 @@ def load_db():
 
 imdb = load_db()
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([0.7, 0.3])
 
 result = {}
 

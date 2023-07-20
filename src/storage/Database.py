@@ -10,10 +10,12 @@ from specification.Query import SelectStatement
 
 class Database():
     def __init__(self,name, data_path) -> None:
-        self.available_index = {
-            "FlatL2" : FlatL2Index,
-            "FlatCosine" : FlatCosineIndex
-        }
+        # self.available_index = {
+        #     "FlatIP" : FlatIPIndex,
+        #     "PQIP" : PQIPIndex,
+        #     "FlatCosine" : FlatCosineIndex,
+        #     "PQCosine" : PQCosineIndex
+        # }
         self.name = name
         self.tables = {}
         self.data_path = os.path.join(data_path, self.name)
@@ -42,7 +44,8 @@ class Database():
         else:
             return t
     def addIndex(self, tableName, index_type, FEFactory):
-        self.getTable(tableName).create_index(index_type, self.available_index[index_type], FEFactory, self.imagesPath)
+        index_type = index_type.upper()
+        self.getTable(tableName).create_index(index_type, FEFactory, self.imagesPath)
     def getIndex(self, tablename, indexType):
         return self.getTable(tablename).getIndex(indexType)
     def listTable(self):
@@ -87,3 +90,5 @@ class Database():
         return new_path
     def getImagebyId(self, id):
         return self.imagesPath[int(id)]
+    def getMetadata(self, id):
+        return self.meta_table.getMetadata(id)

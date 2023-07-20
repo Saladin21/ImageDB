@@ -35,6 +35,10 @@ class QueryEvaluator():
 
             for r in result:
                 r['path'] = self.storage.getCurrentDB().getImagebyId(r['id'])
+                meta = self.storage.getCurrentDB().getMetadata([r['id']])
+                print(meta)
+                for k,v in meta.items():
+                    r[k] = v[r['id']]
         else:
             result = []
         return result
@@ -44,7 +48,8 @@ class QueryEvaluator():
         m = {}
         c = []
         i = 0
-        max = len(statement_result[0])
+        max = len(statement_result[0]['id'][0])
+        # print(max)
         while len(c) < q.type[1] and len(c) < max :
             for j in range(len(statement_result)):
                 id = statement_result[j]['id'][0][i]
@@ -53,7 +58,7 @@ class QueryEvaluator():
                     m[id] = [-1 for i in range(len(statement_result))]
                 m[id][j] = sim
                 if -1 not in m[id]:
-                    c.append({"id":id, 'sim':m[id]})
+                    c.append({"id":id, 'statement_score':m[id]})
                     del m[id]
             i+=1
 
@@ -61,13 +66,16 @@ class QueryEvaluator():
             for i in range(len(statement_result)):
                 if sim[i] == -1:
                     sim[i] = statement_result[i]['sim'][0][np.where(statement_result[i]['id'][0] == id)[0].item()]
-            c.append({"id":id, 'sim':sim})
+            c.append({"id":id, 'statement_score':sim})
 
         for i in c:
-            i['sim'] = q.plan.compute(i['sim'], q.semantic)
+            i['sim'] = q.plan.compute(i['statement_score'], q.semantic)
         c.sort(key=lambda x: x['sim'], reverse=True)
         result = c[:q.type[1]]
-        
+        for r in result:
+            for i, s in enumerate(q.statements):
+                r[str(s)] = r['statement_score'][i]
+            del r['statement_score']
         return result
 
     def topKNRA(self, statement_result, q:SelectQuery):
