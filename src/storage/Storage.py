@@ -49,14 +49,14 @@ class Storage():
                 "tables" : {}
             }
             self.saveState()
-            return "Database Created"
+            return f"Database {q.dbName} Created"
         else:
             raise AssertionError('Database already exist')
 
     def changeDB(self, q : ChangeDBQuery):
         if (q.dbName in self.db.keys()):
             self.current_db = q.dbName
-            return "Using Database q.dbName"
+            return f"Using Database {q.dbName}"
         else:
             raise AssertionError('Database does not exist')
         
@@ -64,15 +64,16 @@ class Storage():
         return self.db[self.current_db]
     
     def insertImage(self, q:InsertImageQuery):
-        self.getCurrentDB().insertImages(self.fe, q.values)
-        return "Image succesfully inserted"
+        n = self.getCurrentDB().insertImages(self.fe, q.values)
+        return f"{n} images succesfully inserted"
 
     def insertFolder(self, q:InsertFolderQuery):
-        return self.getCurrentDB().insertFolder(self.fe, q.folder)
+        n = self.getCurrentDB().insertFolder(self.fe, q.folder)
+        return f"{n} images succesfully inserted"
 
     def deleteImage(self, q:DeleteImageQuery):
         self.getCurrentDB().deleteImage(q.id)
-        return "Image succesfully deleted"
+        return f"{len(q.id)} images succesfully deleted"
 
     def createTable(self, q: CreateTableQuery):
         if (self.current_db is not None):
@@ -85,7 +86,7 @@ class Storage():
                 "indexes" : []
             }
             self.saveState()
-            return "Table created"
+            return f"Table {q.tableName} created"
         else:
             raise AssertionError('No database is chosen')
     
@@ -94,7 +95,7 @@ class Storage():
             self.db[self.current_db].addIndex(q.tableName, q.indexType, self.fe)
             self.structure['databases'][self.current_db]['tables'][q.tableName]["indexes"].append(q.indexType)
             self.saveState()
-            return "Index created"
+            return f"Index {q.indexType} created on {q.tableName}"
         else:
             raise AssertionError('No database is chosen')
     

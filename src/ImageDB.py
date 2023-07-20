@@ -13,6 +13,7 @@ class ImageDB():
         try:
             q = self.parser.parse(input)
         except Exception as e:
+            res['type'] = 'ERROR'
             res['error'] =  e
             return res
         t0 = time.time()
@@ -20,5 +21,6 @@ class ImageDB():
             res = self.evaluator.execute(q)
             res['time'] = time.time() - t0
         except Exception as e:
+            res['type'] = 'ERROR'
             res['error'] =  e
         return res

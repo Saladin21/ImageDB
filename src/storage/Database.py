@@ -38,7 +38,7 @@ class Database():
     def getTable(self, tableName) -> Table:
         t = self.tables.get(tableName)
         if t is None:
-            raise AssertionError("Table does not exist")
+            raise AssertionError(f"Table {tableName} does not exist")
         else:
             return t
     def addIndex(self, tableName, index_type, FEFactory):
@@ -63,9 +63,10 @@ class Database():
             table.insert(FEFactory, new_path)
         self.meta_table.insert(FEFactory, img_path)
         self.saveImagesPath()
+        return len(img_path)
     def insertFolder(self, FEFactory, folder_path):
         img_path = glob.glob(os.path.join(folder_path, "*"))
-        self.insertImages(FEFactory, img_path)
+        return self.insertImages(FEFactory, img_path)
     def deleteImage(self, ids):
         for id in ids:
             self.imagesPath.pop(id)
