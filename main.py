@@ -26,7 +26,7 @@ with col1:
     query = st.text_area(label="Query", height=300, placeholder="Input Query Here")
     if query != "":
         result = imdb.query(query)
-        print(result)
+        # print(result)
     # st.button("Run", on_click=lambda: do_query(query))
     st.write("Result")
     if result.get('type') == "SELECT":
