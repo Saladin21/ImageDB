@@ -36,7 +36,7 @@ class QueryEvaluator():
             for r in result:
                 r['path'] = self.storage.getCurrentDB().getImagebyId(r['id'])
                 meta = self.storage.getCurrentDB().getMetadata([r['id']])
-                print(meta)
+                # print(meta)
                 for k,v in meta.items():
                     r[k] = v[r['id']]
         else:
