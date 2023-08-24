@@ -111,6 +111,9 @@ class Storage():
 
     def showFeature(self, q=None):
         return self.fe.listFE()
+    
+    def showImage(self, q=None):
+        return self.getCurrentDB().getImages()
 
     def search(self, q:SelectQuery):
         if (self.current_db is not None):

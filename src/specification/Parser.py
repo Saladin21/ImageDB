@@ -17,6 +17,7 @@ class Parser():
             'SHOWINDEX' : self.parseShowIndex,
             'SHOWDATABASE' : self.parseShowDB,
             'SHOWFEATURE' : self.parseShowFeature,
+            'SHOWIMAGE' : self.parseShowImage,
         }
     def parse(self, input) -> Query:
         type = self.parseType(input)
@@ -26,7 +27,7 @@ class Parser():
         type = (select_) ^ (use_)
         type = type ^ (create_ + (table_  ^ database_ ^ index_))
         type = type ^ (insert_ + image_ + values_) ^ (insert_ + image_ + folder_) ^ (delete_ + image_)
-        type = type ^ (show_ + (database_ ^ table_ ^ index_ ^ feature_))
+        type = type ^ (show_ + (database_ ^ table_ ^ index_ ^ feature_ ^ image_))
 
         parsed = type.parse_string(input)
         res = ""
@@ -130,6 +131,9 @@ class Parser():
     
     def parseShowFeature(self, input) -> Query:
         return Query('SHOWFEATURE')
+
+    def parseShowImage(self, input) -> Query:
+        return Query('SHOWIMAGE')
     
     def parseShowIndex(self, input) -> ShowIndexQuery:
         parse = show_ + index_ + on_ + alphaword
@@ -141,7 +145,6 @@ class Parser():
         parsed = parse.parse_string(input)
         images = [s.value for s in parsed[3:]]
         return InsertImageQuery(images)
-
 
     def parseInsertFolder(self, input) -> InsertFolderQuery:
         parse = insert_ + image_ + folder_ + lparen + string + rparen

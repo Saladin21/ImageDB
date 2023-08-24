@@ -18,6 +18,7 @@ class QueryEvaluator():
             "INSERTIMAGE" :self.storage.insertImage,
             "INSERTFOLDER" :self.storage.insertFolder,
             "DELETEIMAGE" :self.storage.deleteImage,
+            "SHOWIMAGE" : self.storage.showImage
         }
 
     def execute(self, query:Query):

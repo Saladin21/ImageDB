@@ -92,3 +92,5 @@ class Database():
         return self.imagesPath[int(id)]
     def getMetadata(self, id):
         return self.meta_table.getMetadata(id)
+    def getImages(self):
+        return self.imagesPath
