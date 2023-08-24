@@ -41,7 +41,7 @@ class Parser():
         pp.Word(pp.nums) + pp.Optional("." + pp.OneOrMore(pp.Word(pp.nums)))
         ).setParseAction(Number)
 
-        identifier = alphaword.setParseAction(
+        identifier = alphawordSel.setParseAction(
         Identifier
         )
 
@@ -81,13 +81,16 @@ class Parser():
             statements_meta, plan_meta = parsed.expr_meta.makeNode()
         else:
             st, p = parsed.expr.makeNode()
+            # print(st[0].table)
             if st[0].table == "META":
+                # print("here")
                 statements_meta, plan_meta = st, p
                 statements, plan = None, None
             else:
+                # print("else")
                 statements, plan = st, p
                 statements_meta, plan_meta = None, None
-
+        # print(statements)
         if statements is not None:
             for s in statements:
                 index = parsed.tables.get(s.table)
@@ -106,6 +109,7 @@ class Parser():
     def parseChangeDB(self, input) -> ChangeDBQuery:
         parse = use_ + alphaword
         parsed = parse.parse_string(input)
+        # print(parsed)
         return ChangeDBQuery(parsed[1])
 
     def parseCreateTable(self, input) -> CreateTableQuery:

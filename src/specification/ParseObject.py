@@ -215,6 +215,7 @@ on_ = pp.CaselessKeyword("ON")
 id_ = pp.CaselessKeyword("ID")
 meta_ = pp.CaselessLiteral("META")
 alphaword = pp.Word(pp.alphanums + "_")
+alphawordSel = pp.Word(pp.alphanums + "_")
 number = pp.Word(pp.nums)
 string = pp.QuotedString(quoteChar="'").setParseAction(String) ^ pp.QuotedString(quoteChar='"').setParseAction(String)
 

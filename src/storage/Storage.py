@@ -54,6 +54,7 @@ class Storage():
             raise AssertionError('Database already exist')
 
     def changeDB(self, q : ChangeDBQuery):
+        # print(q.dbName in self.db.keys(), q.dbName, self.db.keys())
         if (q.dbName in self.db.keys()):
             self.current_db = q.dbName
             return f"Using Database {q.dbName}"

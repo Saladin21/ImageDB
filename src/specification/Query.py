@@ -72,7 +72,7 @@ class SelectPlanNode():
                self.value += value
           else:
                for c in self.child:
-                    c.updateValue()
+                    c.updateValue(value)
      def __str__(self):
           printed = str(self.value)
           for c in self.child:

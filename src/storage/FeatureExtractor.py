@@ -91,7 +91,8 @@ class EfficientNetB2FeatureExtractor(FeatureExtractor):
         super().__init__(2, name='EFFICIENTNETB2', supported_pred=['visually_similar'], feature_dim=68992)
         self.model = timm.create_model('tf_efficientnet_b2', pretrained=True)
 
-    def extract(self, input, pred='visually_similar'):
+    def extractImage(self, input, pred='visually_similar'):
+        # print(input)
         image = cv2.imread(input, cv2.IMREAD_COLOR)
         image = cv2.resize(image, (224,224))
         image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
@@ -105,6 +106,9 @@ class EfficientNetB2FeatureExtractor(FeatureExtractor):
         feature = self.model.forward_features(tensor)
 
         return feature.detach().cpu().numpy()[0].flatten()
+
+    def extract(self, input, pred='visually_similar'):
+        return self.extractImage(input[0])
     
 class EfficientNetB5FeatureExtractor(FeatureExtractor):
     def __init__(self):
@@ -125,6 +129,8 @@ class EfficientNetB5FeatureExtractor(FeatureExtractor):
         feature = self.model.forward_features(tensor)
 
         return feature.detach().cpu().numpy()[0].flatten()
+
+    
     
 
 class ClipFeatureExtractor(FeatureExtractor):

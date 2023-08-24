@@ -3,3 +3,4 @@ test.ipynb
 **/__pycache__
 yolov8n.pt
 data_old
+sample
