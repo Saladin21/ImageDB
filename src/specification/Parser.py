@@ -36,7 +36,7 @@ class Parser():
         return res
 
     def parseSelect(self, input) -> SelectQuery:
-        operator_sim = ((contains_ | visual_ | semantic_ | above_ | left_) + lparen + string + pp.Optional(comma + string) +rparen).setParseAction(OperatorSim)
+        operator_sim = ((contains_ | visual_ | semantic_ | above_ | left_ | below_ | right_) + lparen + string + pp.Optional(comma + string) +rparen).setParseAction(OperatorSim)
 
         number = (
         pp.Word(pp.nums) + pp.Optional("." + pp.OneOrMore(pp.Word(pp.nums)))

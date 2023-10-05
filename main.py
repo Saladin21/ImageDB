@@ -14,6 +14,7 @@ st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 @st.cache_resource
 def load_db():
     return ImageDB.ImageDB()
+    # return ImageDB.ImageDB(data_path="new_data/")
 
 # def do_query(q):
 #     print(q)

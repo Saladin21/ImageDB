@@ -12,10 +12,11 @@ class SelectStatement():
           self.not_flag = not_flag
           self.meta_label = meta_label
      def __str__(self) -> str:
-          if self.not_flag:
-               _not = "Not "
-          else:
-               _not = ''
+          # if self.not_flag:
+          #      _not = "Not "
+          # else:
+          #      _not = ''
+          _not = ''
           return f"{_not}{self.predicate}({self.table}, {self.variable[0]})"
 
 class SelectPlanNode():

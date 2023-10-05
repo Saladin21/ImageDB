@@ -59,13 +59,14 @@ class SIFTFeatureExtractor(FeatureExtractor):
             dsc = np.concatenate([dsc, np.zeros(needed_size - dsc.size)])
         return dsc
     
+    
 class KAZEFeatureExtractor(FeatureExtractor):
     def __init__(self, vector_size=32):
         super().__init__(1, name='KAZE', supported_pred=['visually_similar'], feature_dim=2048)
         self.kaze = cv2.KAZE_create()
         self.vector_size = vector_size
 
-    def extract(self, input, pred='visually_similar'):
+    def extractImage(self, input, pred='visually_similar'):
                 # Dinding image keypoints
         im = cv2.imread(input, cv2.IMREAD_COLOR)
         kps = self.kaze.detect(im)
@@ -85,6 +86,8 @@ class KAZEFeatureExtractor(FeatureExtractor):
             # end of our feature vector
             dsc = np.concatenate([dsc, np.zeros(needed_size - dsc.size)])
         return dsc
+    def extract(self, input, pred='visually_similar'):
+        return self.extractImage(input[0])
 
 class EfficientNetB2FeatureExtractor(FeatureExtractor):
     def __init__(self):
@@ -115,7 +118,7 @@ class EfficientNetB5FeatureExtractor(FeatureExtractor):
         super().__init__(5, name='EFFICIENTNETB5', supported_pred=['visually_similar'], feature_dim=100352)
         self.model = timm.create_model('tf_efficientnet_b5', pretrained=True)
 
-    def extract(self, input, pred='visually_similar'):
+    def extractImage(self, input, pred='visually_similar'):
         image = cv2.imread(input, cv2.IMREAD_COLOR)
         image = cv2.resize(image, (224,224))
         image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
@@ -129,8 +132,9 @@ class EfficientNetB5FeatureExtractor(FeatureExtractor):
         feature = self.model.forward_features(tensor)
 
         return feature.detach().cpu().numpy()[0].flatten()
-
     
+    def extract(self, input, pred='visually_similar'):
+        return self.extractImage(input[0])
     
 
 class ClipFeatureExtractor(FeatureExtractor):
@@ -179,7 +183,7 @@ class YOLOv8FeatureExtractor(FeatureExtractor):
 
 class YOLOv8LeftFeatureExtractor(FeatureExtractor):
     def __init__(self):
-        super().__init__(6, name='YOLOV8LEFT', supported_pred=['LEFT'], feature_dim=6400)
+        super().__init__(6, name='YOLOV8LEFT', supported_pred=['LEFT', 'RIGHT'], feature_dim=6400)
         self.model = YOLO('yolov8n.pt')
         self.supported_index = {
             "FLAT" : FlatIPIndex,
@@ -206,10 +210,19 @@ class YOLOv8LeftFeatureExtractor(FeatureExtractor):
                     r = k
             vec[l][r] = 1
             return vec.flatten()
+        elif pred == 'RIGHT':
+            vec = np.array([[0 for i in range(len(self.model.names))] for i in range(len(self.model.names))], dtype="float32")
+            for k,v in self.model.names.items():
+                if v == input[0]:
+                    l = k
+                if v == input[1]:
+                    r = k
+            vec[r][l] = 1
+            return vec.flatten()
 
 class YOLOv8AboveFeatureExtractor(FeatureExtractor):
     def __init__(self):
-        super().__init__(7, name='YOLOV8ABOVE', supported_pred=['ABOVE'], feature_dim=6400)
+        super().__init__(7, name='YOLOV8ABOVE', supported_pred=['ABOVE', 'BELOW'], feature_dim=6400)
         self.model = YOLO('yolov8n.pt')
         self.supported_index = {
             "FLAT" : FlatIPIndex,
@@ -235,6 +248,15 @@ class YOLOv8AboveFeatureExtractor(FeatureExtractor):
                 if v == input[1]:
                     r = k
             vec[l][r] = 1
+            return vec.flatten()
+        elif pred == 'BELOW':
+            vec = np.array([[0 for i in range(len(self.model.names))] for i in range(len(self.model.names))], dtype="float32")
+            for k,v in self.model.names.items():
+                if v == input[0]:
+                    l = k
+                if v == input[1]:
+                    r = k
+            vec[r][l] = 1
             return vec.flatten()
 
 class MetadataFeatureExtractor(FeatureExtractor):

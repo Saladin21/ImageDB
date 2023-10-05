@@ -30,9 +30,12 @@ class QueryEvaluator():
         return query_result
     
     def select(self, query):
-        statement_result = self.storage.search(query)
+        meta_only, statement_result = self.storage.search(query)
         if statement_result is not None:
-            result = self.topKFagin(statement_result, query)
+            if not meta_only:
+                result = self.topKFagin(statement_result, query)
+            else:
+                result = statement_result
 
             for r in result:
                 r['path'] = self.storage.getCurrentDB().getImagebyId(r['id'])
@@ -42,6 +45,7 @@ class QueryEvaluator():
                     r[k] = v[r['id']]
         else:
             result = []
+        # print(result)
         return result
 
     def topKFagin(self, statement_result, q:SelectQuery):

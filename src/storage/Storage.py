@@ -131,6 +131,8 @@ class Storage():
             #similarity search
             if (filter is None or len(filter) > 0):
                 if (q.type[0] == 'knn'):
+                    if q.statements is None:
+                        return (True, [{'id': i} for i in filter][:q.type[1]])
                     statement_result = []
                     for s in q.statements:
                         res = self.db[self.current_db].search(s, self.fe, self.db[self.current_db].getImageCount(), filter)
@@ -139,9 +141,11 @@ class Storage():
                             tmp_res_1 = np.flip(res[1])
                             res = (tmp_res_0, tmp_res_1)
                         statement_result.append({'sim':res[0], 'id':res[1]})
-                    return statement_result
+                    
+                        # statement_result.append({'sim':np.ones(len(filter)), 'id':np.array(filter)})
+                    return (False, statement_result)
             else:
-                return None
+                return (None, None)
         else:
             raise AssertionError('No database is chosen')
 
